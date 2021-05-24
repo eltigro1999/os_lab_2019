@@ -1,27 +1,35 @@
-all:parallel_min_max process_memory number_5_parallel_min_max clean
-find_min_max.o: find_min_max.c
-	gcc -c find_min_max.c -o find_min_max.o
+CC=gcc
+CFLAGS=-I.
 
-utils.o:utils.c
-	gcc -c utils.c -o utils.o
+all : parallel_min_max process_memory zombie parallel_sum clean
 
-parallel_min_max.o: parallel_min_max.c
-	gcc -c parallel_min_max.c -o parallel_min_max.o
+parallel_min_max : utils.o find_min_max.o utils.h find_min_max.h
+	$(CC) -o $@ $@.c $^  $(CFLAGS)
 
-parallel_min_max: find_min_max.o utils.o parallel_min_max.o
-	gcc find_min_max.o utils.o parallel_min_max.o -o parallel_min_max
+process_memory : 
+	$(CC) -o $@ $@.c 
 
-process_memory.o:process_memory.c
-	gcc -c process_memory.c -o process_memory.o
+zombie : 
+	$(CC) -o $@ $@.c 
 
-process_memory:process_memory.o
-	gcc process_memory.o -o process_memory
+parallel_sum : utils.o sum.o utils.h sum.h
+	$(CC) -o $@ $@.c $^ $(CFLAGS) -lpthread
 
-sum.o:sum.c
-	gcc -c sum.c -o sum.o
 
-number_5_parallel_min_max:utils.o find_min_max.o parallel_min_max.o sum.o
-	gcc utils.o find_min_max.o parallel_min_max.o sum.o -o number_5_parallel_min_max
 
-clean:
+utils.o: utils.h
+	$(CC) -o $@ -c utils.c 
+
+find_min_max.o : utils.h find_min_max.h
+	$(CC) -o $@ -c find_min_max.c 
+
+sum.o : sum.h
+	$(CC) -o $@ -c sum.c 
+
+
+
+clean_execs : 
+	rm parallel_sum parallel_min_max process_memory zombie
+
+clean : 
 	rm *.o
